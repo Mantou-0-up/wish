@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>爱心轨迹祝福 | 永恒星夜彩蛋</title>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #fff;
+      font-family: 'ZCOOL KuaiLe', cursive, 'Microsoft YaHei', sans-serif;
+      overflow: hidden;
+      transition: background 1.5s ease;
+    }
+
+    /* 性别选择层 */
+    .gender-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 200;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .gender-container.hidden {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+      pointer-events: none;
+    }
+
+    .gender-container h1 {
+      font-size: 2.8rem;
+      color: #333;
+      margin-bottom: 3rem;
+      letter-spacing: 0.1em;
+    }
+
+    .gender-buttons {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+    }
+
+    .gender-btn {
+      padding: 1.5rem 4rem;
+      font-size: 1.4rem;
+      font-family: inherit;
+      border: 3px solid;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .gender-btn.male {
+      border-color: #4a90d9;
+      color: #4a90d9;
+    }
+
+    .gender-btn.male:hover {
+      background: #4a90d9;
+      color: #fff;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(74, 144, 217, 0.4);
+    }
+
+    .gender-btn.female {
+      border-color: #ff6b8a;
+      color: #ff6b8a;
+    }
+
+    .gender-btn.female:hover {
+      background: #ff6b8a;
+      color: #fff;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 107, 138, 0.4);
+    }
+
+    /* 名字输入层 */
+    .input-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    .input-container.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .input-container h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .input-container.male h1 { color: #4a90d9; }
+    .input-container.female h1 { color: #ff6b8a; }
+
+    .input-container input {
+      padding: 1.2rem 2.5rem;
+      font-size: 1.4rem;
+      font-family: inherit;
+      border: 2px solid;
+      border-radius: 50px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .input-container.male input { border-color: rgba(74, 144, 217, 0.4); }
+    .input-container.female input { border-color: rgba(255, 107, 138, 0.4); }
+
+    .input-container.male input:focus { border-color: #4a90d9; box-shadow: 0 10px 50px rgba(74, 144, 217, 0.2); }
+    .input-container.female input:focus { border-color: #ff6b8a; box-shadow: 0 10px 50px rgba(255, 107, 138, 0.2); }
+
+    .input-container button {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 1rem 4rem;
+      font-size: 1.3rem;
+      font-family: inherit;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .input-container.male button { background: linear-gradient(135deg, #4a90d9, #357abd); box-shadow: 0 8px 30px rgba(74, 144, 217, 0.4); }
+    .input-container.female button { background: linear-gradient(135deg, #ff6b8a, #ff4d6d); box-shadow: 0 8px 30px rgba(255, 77, 109, 0.4); }
+
+    .input-container button:hover {
+      transform: translateY(-3px);
+    }
+
+    body.male-bg { background: linear-gradient(135deg, #1a3a5c 0%, #2d5a87 50%, #1a3a5c 100%); }
+    body.female-bg { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffb6c1 100%); }
+    body.dark { background: #111 !important; }
+
+    /* 祝福气泡 */
+    .chat-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 16px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      color: #444;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      max-width: 200px;
+      text-align: center;
+      line-height: 1.5;
+      pointer-events: none;
+      border: 1px solid rgba(255, 182, 193, 0.4);
+    }
+
+    .chat-bubble .name { font-weight: bold; }
+    body.male-bg .chat-bubble .name { color: #4a90d9; }
+    body.female-bg .chat-bubble .name { color: #ff6b8a; }
+    body.male-bg .chat-bubble { border-color: rgba(74, 144, 217, 0.4); }
+    body.female-bg .chat-bubble { border-color: rgba(255, 182, 193, 0.4); }
+
+    /* Next 按钮（初始位置右下角） */
+    .next-btn {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      padding: 14px 32px;
+      background: #ff6b8a;
+      color: white;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      z-index: 400;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: transform 0.2s, background 0.2s;
+      display: none;
+    }
+    .next-btn:hover {
+      background: #ff4d6d;
+      transform: scale(1.05);
+    }
+
+    /* End 按钮（星夜特效时显示） */
+    .end-btn {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      padding: 14px 32px;
+      background: #2c3e50;
+      color: white;
+      font-family: 'ZCOOL KuaiLe', cursive;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      z-index: 500;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background 0.2s;
+      display: none;
+    }
+    .end-btn:hover {
+      background: #1a2a3f;
+      transform: scale(1.05);
+    }
+
+    /* 梵高星夜特效画布 */
+    #starry-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 500;
+      display: none;
+    }
+    #starry-canvas.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="gender-container" id="genderContainer">
+    <h1>请选择你的性别</h1>
+    <div class="gender-buttons">
+      <button class="gender-btn male" id="maleBtn">男生</button>
+      <button class="gender-btn female" id="femaleBtn">女生</button>
+    </div>
+  </div>
+
+  <div class="input-container" id="inputContainer">
+    <h1>输入你的名字</h1>
+    <input type="text" id="nameInput" placeholder="在这里输入名字..." autocomplete="off">
+    <button id="startBtn">开始祝福</button>
+  </div>
+
+  <button class="next-btn" id="nextBtn">Next</button>
+  <button class="end-btn" id="endBtn">End</button>
+
+  <canvas id="starry-canvas"></canvas>
+
+  <script>
+    (function(){
+      // DOM 元素
+      const genderContainer = document.getElementById('genderContainer');
+      const inputContainer = document.getElementById('inputContainer');
+      const nameInput = document.getElementById('nameInput');
+      const startBtn = document.getElementById('startBtn');
+      const maleBtn = document.getElementById('maleBtn');
+      const femaleBtn = document.getElementById('femaleBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const endBtn = document.getElementById('endBtn');
+      const starryCanvas = document.getElementById('starry-canvas');
+      let starryCtx = starryCanvas.getContext('2d');
+
+      let width, height, centerX, centerY;
+      let gender = null;
+      let currentTimeoutId = null;
+
+      // ---------- 祝福语库 ----------
+      const baseBlessings = [
+        "被世界温柔以待，所有的付出都有回报",
+        "每一个梦想都能照进现实",
+        "遇到困难时总有人伸出援手",
+        "心中有光，脚下有力",
+        "永远保持那份最初的善良",
+        "被很多人爱着，也深深爱着别人",
+        "生活像糖果一样甜",
+        "每一天都比昨天更精彩",
+        "钱包越来越鼓",
+        "体重秤上的数字是开心的",
+        "皮肤水嫩嫩，人见人夸",
+        "睡眠质量一级棒",
+        "胃口好吃嘛嘛香",
+        "视力越来越好",
+        "头发又黑又亮",
+        "考试都能超常发挥",
+        "工作顺利，升职加薪",
+        "遇到的都是好人",
+        "错的人都会离开，对的人一直在",
+        "家人身体健康",
+        "朋友都是真心实意的",
+        "恋人宠你像公主",
+        "孩子聪明又可爱",
+        "宠物活泼又乖巧",
+        "旅行中遇到最美的风景",
+        "下雨天有人接，雨伞足够大",
+        "冬天有热可可和暖气",
+        "夏天有空调西瓜和wifi",
+        "春天有花夏天有海秋天有月冬天有雪",
+        "每年都能去一个新的地方",
+        "学会的新技能越来越多",
+        "能做一手好菜",
+        "身材越来越棒",
+        "体能越来越好",
+        "心态越来越平和",
+        "皱纹长得特别慢",
+        "年龄成谜身材无敌",
+        "永远有人为你骄傲",
+        "回头看时满是欣慰",
+        "未来可期人间值得",
+        "所行皆坦途，所愿皆成真",
+        "烦恼清零，快乐加倍",
+        "好运永远站在你这边",
+        "每天都有小确幸",
+        "抬头遇见温柔，低头拾起幸福",
+        "做自己的太阳，无需凭借谁的光",
+        "所有的等待都不被辜负",
+        "遗憾都变成惊喜的铺垫",
+        "平淡日子里也有光",
+        "远方传来好消息",
+        "每一次尝试都带来成长"
+      ];
+
+      function getRandomBlessings(count, name) {
+        let shuffled = [...baseBlessings];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        let result = [];
+        while (result.length < count) {
+          result.push(...shuffled.slice(0, count - result.length));
+        }
+        return result.map(msg => `亲爱的 <span class="name">${name}</span>，我希望你<br>${msg}`);
+      }
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        centerX = width / 2;
+        centerY = height / 2;
+        if (starryCanvas) {
+          starryCanvas.width = width;
+          starryCanvas.height = height;
+        }
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      // 心形方程（Y轴取反，心尖向下）
+      function heartEquation(t) {
+        const x = 16 * Math.pow(Math.sin(t), 3);
+        const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        return { x, y };
+      }
+
+      function getHeartPoints(count, scale) {
+        const points = [];
+        for (let i = 0; i < count; i++) {
+          const t = (i / count) * Math.PI * 2;
+          const point = heartEquation(t);
+          points.push({
+            x: centerX + point.x * scale,
+            y: centerY + point.y * scale
+          });
+        }
+        return points;
+      }
+
+      function createChatBubble(text, x, y, delay) {
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.innerHTML = text;
+        bubble.style.left = x + 'px';
+        bubble.style.top = y + 'px';
+        bubble.style.transform = 'translate(-50%, -50%) scale(0.3)';
+        document.body.appendChild(bubble);
+        setTimeout(() => {
+          bubble.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          bubble.style.opacity = '1';
+          bubble.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, delay);
+        return delay + 400;
+      }
+
+      function createRound(blessingList, points, offsetX, offsetY, startDelay, bubbleInterval = 48) {
+        let maxDelay = startDelay;
+        blessingList.forEach((text, i) => {
+          const targetX = points[i].x + offsetX;
+          const targetY = points[i].y + offsetY;
+          const delay = startDelay + i * bubbleInterval;
+          const endTime = createChatBubble(text, targetX, targetY, delay);
+          if (endTime > maxDelay) maxDelay = endTime;
+        });
+        return maxDelay;
+      }
+
+      function selectGender(g) {
+        gender = g;
+        const theme = g === 'male' ? 'male-bg' : 'female-bg';
+        document.body.classList.add(theme);
+        inputContainer.className = `input-container visible ${g}`;
+        genderContainer.classList.add('hidden');
+      }
+
+      function startAnimation(name) {
+        if (currentTimeoutId) clearTimeout(currentTimeoutId);
+        document.querySelectorAll('.chat-bubble').forEach(el => el.remove());
+        nextBtn.style.display = 'none';
+        endBtn.style.display = 'none';
+        
+        inputContainer.classList.remove('visible');
+        inputContainer.classList.add('hidden');
+
+        const PER_ROUND_COUNT = 52;
+        const round1Blessings = getRandomBlessings(PER_ROUND_COUNT, name);
+        const round2Blessings = getRandomBlessings(PER_ROUND_COUNT, name);
+
+        const scale = Math.min(width, height) * 0.038;
+        const points = getHeartPoints(PER_ROUND_COUNT, scale);
+        const offsetX = 80;
+        const offsetY = 80;
+        const firstStartDelay = 600;
+        const bubbleInterval = 48;
+        
+        const firstRoundEnd = createRound(round1Blessings, points, 0, 0, firstStartDelay, bubbleInterval);
+        const secondStartDelay = firstRoundEnd + 80;
+        const secondRoundEnd = createRound(round2Blessings, points, offsetX, offsetY, secondStartDelay, bubbleInterval);
+        const allBubblesEnd = secondRoundEnd;
+        
+        currentTimeoutId = setTimeout(() => {
+          nextBtn.style.display = 'block';
+        }, allBubblesEnd + 500);
+      }
+
+      // ---------- 梵高星夜永久粒子特效 ----------
+      let starryActive = false;
+      let starryAnimId = null;
+      let starryParticles = [];
+
+      // 梵高色调
+      const starryColors = [
+        "#1e2a47", "#2c3e66", "#3b4b7a", "#5872a0",  // 蓝调
+        "#e8b55a", "#f0c46c", "#f5d68a",              // 金黄
+        "#f7f0da", "#ffffff", "#d4e0e8"               // 白/银
+      ];
+
+      class StarParticle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.size = 2 + Math.random() * 5;
+          this.color = starryColors[Math.floor(Math.random() * starryColors.length)];
+          this.alpha = 0.7 + Math.random() * 0.3;
+          this.life = 1.0;
+          this.decay = 0.002 + Math.random() * 0.005; // 衰减较慢，可存活很久
+          // 漩涡运动参数
+          this.angle = Math.random() * Math.PI * 2;
+          this.radius = Math.random() * Math.min(width, height) * 0.7;
+          this.speed = 0.005 + Math.random() * 0.01;
+          this.radialSpeed = 0.3 + Math.random() * 0.6;
+        }
+        update(centerX, centerY) {
+          // 螺旋向内运动，并慢慢衰减
+          this.angle += this.speed;
+          this.radius -= this.radialSpeed;
+          if (this.radius < 10) {
+            // 粒子到达中心附近，重置到外围，实现循环永生
+            this.radius = Math.min(width, height) * (0.6 + Math.random() * 0.4);
+            this.angle = Math.random() * Math.PI * 2;
+            this.life = 1.0;
+            this.decay = 0.002 + Math.random() * 0.005;
+            this.color = starryColors[Math.floor(Math.random() * starryColors.length)];
+          }
+          const targetX = centerX + Math.cos(this.angle) * this.radius;
+          const targetY = centerY + Math.sin(this.angle) * this.radius * 0.6;
+          // 平滑移动到新位置
+          this.x = this.x * 0.95 + targetX * 0.05;
+          this.y = this.y * 0.95 + targetY * 0.05;
+          this.life -= this.decay;
+          if (this.life < 0.2) {
+            // 重置生命
+            this.life = 1.0;
+          }
+          this.alpha = 0.5 + this.life * 0.5;
+          return true;
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.fillStyle = this.color;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "rgba(255,200,100,0.6)";
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function initStarryParticles(count = 350) {
+        starryParticles = [];
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const rad = Math.min(width, height) * (0.3 + Math.random() * 0.6);
+          const x = centerX + Math.cos(angle) * rad;
+          const y = centerY + Math.sin(angle) * rad * 0.6;
+          starryParticles.push(new StarParticle(x, y));
+        }
+      }
+
+      function animateStarry() {
+        if (!starryActive) return;
+        starryCtx.clearRect(0, 0, width, height);
+        // 深色渐变夜空
+        const grad = starryCtx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, "#0b1320");
+        grad.addColorStop(1, "#1a2a3f");
+        starryCtx.fillStyle = grad;
+        starryCtx.fillRect(0, 0, width, height);
+        
+        for (let p of starryParticles) {
+          p.update(centerX, centerY);
+          p.draw(starryCtx);
+        }
+        
+        starryAnimId = requestAnimationFrame(animateStarry);
+      }
+
+      function startStarryPermanent() {
+        if (starryActive) return;
+        starryActive = true;
+        starryCanvas.classList.add('active');
+        starryCanvas.width = width;
+        starryCanvas.height = height;
+        initStarryParticles(380);
+        if (starryAnimId) cancelAnimationFrame(starryAnimId);
+        starryAnimId = requestAnimationFrame(animateStarry);
+        // 显示 End 按钮，隐藏 Next 按钮
+        nextBtn.style.display = 'none';
+        endBtn.style.display = 'block';
+      }
+
+      // 停止星夜并重置界面
+      function stopStarryAndReset() {
+        if (!starryActive) return;
+        starryActive = false;
+        if (starryAnimId) cancelAnimationFrame(starryAnimId);
+        starryCanvas.classList.remove('active');
+        endBtn.style.display = 'none';
+        // 重置所有状态
+        if (currentTimeoutId) clearTimeout(currentTimeoutId);
+        document.querySelectorAll('.chat-bubble').forEach(el => el.remove());
+        document.body.className = '';
+        document.body.style.background = '#fff';
+        genderContainer.classList.remove('hidden');
+        inputContainer.classList.remove('visible', 'male', 'female');
+        inputContainer.classList.add('hidden');
+        nameInput.value = '';
+        gender = null;
+      }
+
+      // 绑定事件
+      maleBtn.addEventListener('click', () => selectGender('male'));
+      femaleBtn.addEventListener('click', () => selectGender('female'));
+      startBtn.addEventListener('click', () => {
+        const name = nameInput.value.trim() || '宝贝';
+        startAnimation(name);
+      });
+      nameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const name = nameInput.value.trim() || '宝贝';
+          startAnimation(name);
+        }
+      });
+      nextBtn.addEventListener('click', () => {
+        if (starryActive) return;
+        startStarryPermanent();
+      });
+      endBtn.addEventListener('click', () => {
+        if (starryActive) {
+          stopStarryAndReset();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
